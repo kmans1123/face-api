@@ -7,27 +7,115 @@
     <link rel="icon" href="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" type="image/x-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; background: #f4f4f4; overflow: hidden; height: 100%; }
-        #fake-site { min-height: 100vh; display: flex; flex-direction: column; }
-        .nav { background: #003366; color: white; padding: 15px 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        /* 상단 바 로고 스타일 */
-        .nav img { height: 24px; filter: brightness(0) invert(1); }
-        
-        .content { max-width: 450px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; }
-        
-        .form-container { margin-top: 20px; text-align: left; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 0.85em; color: #666; margin-bottom: 5px; margin-left: 2px; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; outline: none; }
-        .input-field:focus { border-color: #F26522; box-shadow: 0 0 5px rgba(242,101,34,0.2); }
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Malgun Gothic', sans-serif;
+        background: #f4f4f4;
+        min-height: 100%;
+    }
 
-        .btn { background: #F26522; color: white; border: none; padding: 18px; font-size: 1.1em; cursor: pointer; border-radius: 6px; width: 100%; font-weight: bold; margin-top: 10px; }
-        
-        #terminal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; color: #00FF00; font-family: 'Courier New', monospace; padding: 25px; box-sizing: border-box; z-index: 9999; overflow-y: auto; }
-        .scan-line { color: #00FF00; margin: 2px 0; font-size: 0.85em; word-break: break-all; }
-        .found { color: #ff3e3e; font-weight: bold; animation: blink 0.5s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
-    </style>
+    #fake-site {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .nav {
+        background: #003366;
+        color: white;
+        padding: 15px 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: sticky; /* sticky 사용 시 position 명시 필요 */
+        top: 0;
+    }
+
+    .nav img {
+        height: 22px;
+        filter: brightness(0) invert(1);
+    }
+
+    .content {
+        width: 92%;
+        max-width: 450px;
+        margin: 30px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .form-container {
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    .input-group {
+        margin-bottom: 12px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 16px; /* iOS 자동 줌 방지용 최소 크기 */
+        outline: none;
+    }
+
+    .input-field:focus {
+        border-color: #F26522;
+    }
+
+    .btn {
+        background: #F26522;
+        color: white;
+        border: none;
+        padding: 16px;
+        font-size: 1.1em;
+        cursor: pointer;
+        border-radius: 6px;
+        width: 100%;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    #terminal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0a0a;
+        color: #00FF00;
+        font-family: 'Courier New', monospace;
+        padding: 20px;
+        box-sizing: border-box;
+        z-index: 9999;
+        overflow-y: auto;
+    }
+
+    .scan-line {
+        color: #00FF00;
+        margin: 2px 0;
+        font-size: 0.85em;
+        word-break: break-all;
+    }
+</style>
 </head>
 <body>
 
